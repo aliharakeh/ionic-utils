@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Storage} from '@ionic/storage-angular';
-import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver';
 import {from, of} from 'rxjs';
 import {catchError, map, switchMap, take, tap} from 'rxjs/operators';
+import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver';
 
 @Injectable({
     providedIn: 'root'
@@ -16,52 +16,56 @@ export class StorageService {
     public init() {
         return this._toObservable(this.storage.defineDriver(CordovaSQLiteDriver)).pipe(
             switchMap(_ => this._toObservable(this.storage.create())),
-            tap((storage: any) => this._storage = storage)
+            tap((storage) => this._storage = storage)
         );
     }
 
     public set(key: string, value: any) {
-        return this._toObservable(this._storage?.set(key, value));
+        return this._toObservable(this._storage.set(key, value));
     }
 
     public get(key: string) {
-        return this._toObservable(this._storage?.get(key));
+        return this._toObservable(this._storage.get(key));
     }
 
     public remove(key: string) {
-        return this._toObservable(this._storage?.remove(key));
+        return this._toObservable(this._storage.remove(key));
     }
 
     public length() {
-        return this._toObservable(this._storage?.length());
+        return this._toObservable(this._storage.length());
     }
 
     public keys() {
-        return this._toObservable(this._storage?.keys());
+        return this._toObservable(this._storage.keys());
     }
 
-    public forEach(iteratorCallback: (value: any, key: string, iterationNumber: Number) => any) {
-        return this._toObservable(this._storage?.forEach(iteratorCallback));
+    public forEach(iteratorCallback: (value: any, key: string, iterationNumber: number) => any) {
+        return this._toObservable(this._storage.forEach(iteratorCallback));
     }
 
-    public clearAllExcept(keys: string[]) {
-        const res = [];
+    public clearAllNotIncluding(text) {
+        const keys = [];
         return this.forEach((v, k, index) => {
-            if (keys.includes(k)) {
-                res.push(k);
+            if (!k.includes(text)) {
+                keys.push(k);
             }
         }).pipe(
-            // mergeMap((k) => this.remove(k))
+            tap(_ => {
+                keys.forEach(key => {
+                    this.remove(key).subscribe();
+                });
+            })
         );
     }
 
     public clearAll() {
-        return this._toObservable(this._storage?.clear());
+        return this._toObservable(this._storage.clear());
     }
 
     public getKeys(keys: string[]) {
         keys = keys.map(k => k.toLowerCase());
-        const data: any[] = [];
+        let data = [];
         return this.forEach((v, k, i) => {
             if (keys.includes(k.toLowerCase())) {
                 data.push(v);
@@ -71,7 +75,7 @@ export class StorageService {
         );
     }
 
-    private _toObservable(action: any) {
+    private _toObservable(action) {
         return from(action).pipe(
             take(1),
             catchError(_ => of(null))
