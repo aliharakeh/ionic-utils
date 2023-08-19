@@ -1,0 +1,7 @@
+platforms:
+    android:
+        manifest:
+            # for development project sync only
+            -   file: AndroidManifest.xml
+                target: manifest/application/activity
+                delete: //intent-filter[@android:autoVerify="true"]

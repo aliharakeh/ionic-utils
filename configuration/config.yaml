@@ -1,0 +1,89 @@
+vars:
+    VERSION_NAME:
+        default: 1.0.0
+    VERSION_NUMBER:
+        default: 1
+#    DEEP_LINK_DOMAIN:
+#        default: mobile.site.com
+    SPLASH_SCREEN_BG:
+        default: '#18a0fb' # fixes malformed splash screen logo (update the color here if you change the background)
+    IOS_DISPLAY_NAME:
+        default: ionic App
+    IOS_BUNDLE_ID:
+        default: com.appName.app
+#    IOS_APP_LINKS:
+#        default: [ "applinks:mobile.site.com" ]
+
+platforms:
+    android:
+        versionName: $VERSION_NAME
+        versionCode: $VERSION_NUMBER
+#        manifest:
+#            # Deep Links
+#            -   file: AndroidManifest.xml
+#                target: manifest/application/activity
+#                inject: |
+#                    <intent-filter android:autoVerify="true">
+#                        <action android:name="android.intent.action.VIEW" />
+#                        <category android:name="android.intent.category.DEFAULT" />
+#                        <category android:name="android.intent.category.BROWSABLE" />
+#                        <data android:scheme="https" android:host="$DEEP_LINK_DOMAIN" />
+#                    </intent-filter>
+        res:
+            # Splash Screen background color
+            -   path: values
+                file: colors.xml
+                text: |
+                      <?xml version="1.0" encoding="utf-8"?>
+                      <resources xmlns:tools="http://schemas.android.com/tools">
+                          <color tools:ignore="UnusedResources" name="colorSplash">$SPLASH_SCREEN_BG</color>
+                      </resources>
+
+            # Splash Screen background color (Android 12+ / API 31+)
+            -   path: values-v31
+                file: styles.xml
+                text: |
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <resources>
+                        <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+                            <item name="android:windowSplashScreenBackground">@color/colorSplash</item>
+                        </style>
+                    </resources>
+
+            # Splash Screen background image
+            -   path: drawable
+                file: splash_background.xml
+                text: |
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+                        <item android:drawable="@color/colorSplash" />
+                        <item>
+                            <bitmap android:gravity="center" android:src="@drawable/splash" />
+                        </item>
+                    </layer-list>
+
+        # Splash Screen config
+        xml:
+            -   file: app/src/main/res/values/styles.xml
+                target: /resources/style[@parent='Theme.SplashScreen']
+                merge: |
+                    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+                        <item name="android:background">@drawable/splash_background</item>
+                    </style>
+
+    ios:
+        bundleId: $IOS_BUNDLE_ID
+        version: $VERSION_NAME
+        buildNumber: $VERSION_NUMBER
+
+#        # Deep Links
+#        entitlements:
+#            - com.apple.developer.associated-domains: $IOS_APP_LINKS
+
+        # iOS config & Permissions Description
+        plist:
+            replace: false
+            entries:
+                # display name & short name
+                - CFBundleDisplayName: $IOS_DISPLAY_NAME
+                - CFBundleName: $IOS_DISPLAY_NAME
