@@ -124,6 +124,8 @@ Inside `global.scss`
 
 
 # Back Button Control
+check: https://ionicframework.com/docs/developing/hardware-back-button
+
 Inside `app.component.ts`
 
 ```ts
